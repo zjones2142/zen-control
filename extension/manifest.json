@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "Zen Control",
+  "version": "0.1.1",
+  "description": "Lets Claude Code drive this browser through a local MCP bridge (ws://127.0.0.1:17373).",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zen-control@local",
+      "strict_min_version": "115.0"
+    }
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "webNavigation",
+    "storage",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "browser_action": {
+    "default_title": "Zen Control: disconnected",
+    "default_icon": "icon.svg"
+  },
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  }
+}
