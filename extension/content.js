@@ -281,7 +281,29 @@
     }
     let submitted = false;
     if (args.submit) submitted = pressEnter(el);
-    return { typed: text.length, into: describe(el) || el.tagName.toLowerCase(), submitted, mayNavigate: !!args.submit };
+    const out = { typed: text.length, into: describe(el) || el.tagName.toLowerCase(), submitted, mayNavigate: !!args.submit };
+    // Surface form validation: apps often reject a value silently (React/Formik
+    // render the error below the fold and just refuse to submit), so report it.
+    const validation = validationFor(el);
+    if (validation) out.validation = validation;
+    return out;
+  }
+  /* Collects native constraint errors, aria-invalid, and nearby error text for a field. */
+  function validationFor(el) {
+    const problems = [];
+    try { if (el.willValidate && !el.checkValidity()) problems.push(el.validationMessage || "fails native constraint validation"); } catch {}
+    if (el.getAttribute("aria-invalid") === "true") problems.push("aria-invalid=true");
+    const ids = ((el.getAttribute("aria-errormessage") || "") + " " + (el.getAttribute("aria-describedby") || "")).trim().split(/\s+/).filter(Boolean);
+    for (const id of ids) { const n = document.getElementById(id); const t = n && clean(n.innerText, 200); if (t) problems.push(t); }
+    // Blur so on-blur validators run, then look for an error node near the field.
+    el.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    el.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    let n = el;
+    for (let depth = 0; depth < 4 && n; depth++, n = n.parentElement) {
+      const errNode = [...n.querySelectorAll('[role=alert], [aria-live=assertive], [class*="error" i], [class*="invalid" i], [class*="helper" i]')].find((x) => x !== el && isVisible(x) && clean(x.innerText));
+      if (errNode) { const t = clean(errNode.innerText, 200); if (t && !problems.includes(t)) problems.push(t); break; }
+    }
+    return problems.length ? problems.join(" | ") : null;
   }
   function pressEnter(el) {
     const notPrevented = keyEvent(el, "keydown", "Enter");

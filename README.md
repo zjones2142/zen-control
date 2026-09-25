@@ -50,6 +50,11 @@ Tools: `tabs_list`, `tab_new`, `tab_select`, `tab_close`, `navigate`, `go_back`,
 Typical flow: `navigate` → `read_page` (get refs like `e12`) → `click`/`type`
 with a ref → `screenshot` to verify.
 
+`type` works on React-controlled inputs (it goes through the native value
+setter and fires `input`/`change`). Its result includes a `validation` field
+when the field is rejected (native constraint message, `aria-invalid`, or
+nearby error text) — check it before assuming a form will submit.
+
 ## Security notes
 
 - The WebSocket only listens on 127.0.0.1, but any local process could connect

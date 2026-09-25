@@ -1,6 +1,6 @@
 {
   "name": "zen-control",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "Control the Zen browser from Claude Code via a WebExtension + MCP bridge",
